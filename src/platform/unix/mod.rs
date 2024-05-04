@@ -896,7 +896,14 @@ impl OsIpcSharedMemory {
         unsafe {
             let store = BackingStore::new(bytes.len());
             let (address, _) = store.map_file(Some(bytes.len()));
-            ptr::copy_nonoverlapping(bytes.as_ptr(), address, bytes.len());
+            let src = bytes.as_ptr();
+            let dst = address;
+            let align: usize = mem::align_of::<u8>();
+            assert!(!src.is_null());
+            assert_eq!(src.align_offset(align), 0);
+            assert!(!dst.is_null());
+            assert_eq!(dst.align_offset(align), 0);
+            ptr::copy(bytes.as_ptr(), address, bytes.len());
             OsIpcSharedMemory::from_raw_parts(address, bytes.len(), store)
         }
     }
