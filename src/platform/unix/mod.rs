@@ -893,6 +893,7 @@ impl OsIpcSharedMemory {
     }
 
     pub fn from_bytes(bytes: &[u8]) -> OsIpcSharedMemory {
+        assert!(!bytes.is_empty());
         unsafe {
             let store = BackingStore::new(bytes.len());
             let (address, _) = store.map_file(Some(bytes.len()));
@@ -903,7 +904,7 @@ impl OsIpcSharedMemory {
             assert_eq!(src.align_offset(align), 0);
             assert!(!dst.is_null());
             assert_eq!(dst.align_offset(align), 0);
-            ptr::copy(bytes.as_ptr(), address, bytes.len());
+            ptr::copy(src, dst, bytes.len());
             OsIpcSharedMemory::from_raw_parts(address, bytes.len(), store)
         }
     }
